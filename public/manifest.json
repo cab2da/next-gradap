@@ -1,7 +1,7 @@
 {
-    "name": "(주)나더",
-    "short_name": "Nader",
-    "description": "메가인포 홈페이지 입니다",
+    "name": "Gradap",
+    "short_name": "Gradap",
+    "description": "그래! 그래 답 홈페이지 입니다",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#ffffff",
