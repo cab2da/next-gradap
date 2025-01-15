@@ -1,9 +1,11 @@
+
 import { LogOut, Sigma, Wand } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
 import { IoHomeSharp } from "react-icons/io5";
 import { usePathname } from 'next/navigation';
 import { useRouter } from 'next/navigation';
+// import { UserContext } from '@/context/UserContext';
 
 function Navbar() {
     const router = useRouter();
@@ -13,9 +15,8 @@ function Navbar() {
         try {
           // 서버에서 쿠키 삭제
           const response = await fetch('/api/logout', { method: 'POST', cache: 'no-store' });
-    
+
           if (response.ok) {
-            // console.log('Logout successful');
             // 홈 화면으로 이동
             router.push('/');
           } else {
