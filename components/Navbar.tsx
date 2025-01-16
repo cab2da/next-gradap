@@ -29,7 +29,7 @@ function Navbar() {
       
 
   return (
-    <div className='flex flex-row w-full h-[63px] items-center justify-between px-28 py-4 bg-white border-t-[1px] border-[#F4F4F4]'>
+    <div className='flex flex-row w-full h-[63px] items-center justify-between px-10 py-4 bg-white border-t-[1px] border-[#F4F4F4]'>
 
         <Link href='/mega' className={`flex flex-col items-center gap-1 ${pathname === '/mega' ? 'text-sky-600' : 'text-gray-600'} `}>
             <IoHomeSharp size="18" />

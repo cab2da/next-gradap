@@ -10,11 +10,11 @@ import Loading from "./loading";
 export default function Home() {
   const router = useRouter()
 
-  const contextUser = useContext(UserContext);
-  if (!contextUser) {
-    throw new Error('userInfo must be used within a SelectedLawdCodeContext.Provider');
-  }
-  const { user, setUser } = contextUser;
+  // const contextUser = useContext(UserContext);
+  // if (!contextUser) {
+  //   throw new Error('userInfo must be used within a SelectedLawdCodeContext.Provider');
+  // }
+  // const { user, setUser } = contextUser;
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [desc, setDesc ] = useState('');
@@ -39,7 +39,7 @@ export default function Home() {
           userLevel: result[0].user_level,
         };
   
-        setUser(userInfo);
+        // setUser(userInfo);
 
         router.push('/mega');
       } else {
@@ -49,7 +49,7 @@ export default function Home() {
           userLevel: '',
         };
   
-        setUser(userInfo);
+        // setUser(userInfo);
 
         setIsDialogOpen(true);
         setDesc("아이디와 비밀번호를 확인하세요.")
@@ -62,7 +62,7 @@ export default function Home() {
         userLevel: '',
       };
 
-      setUser(userInfo);
+      // setUser(userInfo);
       
       setIsDialogOpen(true);
       setDesc("'알 수 없는 오류가 발생했습니다.")
