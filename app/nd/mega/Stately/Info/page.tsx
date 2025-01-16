@@ -14,10 +14,13 @@ const StatelyCInfo = () => {
     const [dataResult, setDataResult] = useState<DataResult[]>([]);
     const [refresh, setRefresh] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
+    const [isLoading, setIsLoading] = useState(false); // 로딩 상태 
 
     useEffect(() => {
         const fetchData = async () => {
             try {
+                setIsLoading(true); // 로딩 시작
+
                 const storedProcName = "GD_REPORT_Now";
                 const params = {};
 
@@ -33,6 +36,8 @@ const StatelyCInfo = () => {
 
             } catch (error) {
                 console.error('Error:', error);
+            } finally {
+                setIsLoading(false); // 로딩 종료
             }
         };
 
@@ -46,7 +51,6 @@ const StatelyCInfo = () => {
         setIsProcessing(true);
 
         try {
-            // const storedProcName = "GD_REPORT_Now";
             const storedProcName = "GD_SP_ID_Update";
             const params = {};
 
@@ -93,6 +97,10 @@ const StatelyCInfo = () => {
         }
     };
 
+    if (isLoading) {
+        return <Loading />;
+    }
+
     return (
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 px-4 pt-4 pb-20 gap-4 bg-gray-50'>
                 {dataResult.length > 0 ? (
@@ -123,7 +131,7 @@ const StatelyCInfo = () => {
                             txt2='' />
                     </>
                 ):(
-                    <Loading />
+                    <div></div>
                 )}
             </div>
        

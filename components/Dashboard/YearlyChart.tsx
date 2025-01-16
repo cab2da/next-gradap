@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
+import { UserContext  } from '@/context/UserContext'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 interface Content {
@@ -18,7 +19,12 @@ interface YearlyChartProps {
 
 const YearlyChart = ({ currentDate }: YearlyChartProps) => {
     const [dataResult, setDataResult] = useState<Content[]>([]);
-    
+    const contextUser = useContext(UserContext);
+    if (!contextUser) {
+        throw new Error('userInfo must be used within a SelectedLawdCodeContext.Provider');
+    }
+    const { user, setUser } = contextUser;
+
     useEffect(() => {
         const fetchData = async () => {
             try {        
@@ -28,7 +34,7 @@ const YearlyChart = ({ currentDate }: YearlyChartProps) => {
                     body: JSON.stringify({
                         SelType: '차트_년',
                         InsDate: currentDate,
-                        UserId: 'MEGA4143',
+                        UserId: user?.userID,
                     }),
                 });
                 const sqlData = await res.json();

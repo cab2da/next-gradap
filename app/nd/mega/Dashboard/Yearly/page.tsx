@@ -1,7 +1,8 @@
 
 "use client";
 
-import { useEffect, useState  } from "react";
+import { useEffect, useState,useContext } from "react";
+import { UserContext  } from '@/context/UserContext'
 import YearlyChart from "@/components/Dashboard/YearlyChart";
 import Loading from "@/app/loading";
 import { FaArrowCircleLeft, FaArrowCircleRight } from "react-icons/fa";
@@ -46,9 +47,17 @@ const YearlyDashboard = () => {
         setCurrentYear((prevYear) => prevYear + 1);
     };
     
+    const contextUser = useContext(UserContext);
+    if (!contextUser) {
+        throw new Error('userInfo must be used within a SelectedLawdCodeContext.Provider');
+    }
+    const { user, setUser } = contextUser;
+    const [isLoading, setIsLoading] = useState(false); // 로딩 상태 
+
     useEffect(() => {
         const fetchData = async () => {
             try {  
+                setIsLoading(true); // 로딩 시작
 
                 const prevyear = currentYear - 1; 
                 setPrevYearRange(`${prevyear}년 ~ ${currentYear}년 대비`);
@@ -64,7 +73,7 @@ const YearlyDashboard = () => {
                 const params = {
                     SelType: '년간',
                     InsDate: nowDate,
-                    UserId: 'MEGA4143',
+                    UserId: user?.userID,
                 };
         
                 const res = await fetch(`/api/connect?query=${storedProcName}`, {
@@ -79,11 +88,17 @@ const YearlyDashboard = () => {
 
             } catch (error) {
                 console.error('Error:', error);
+            } finally {
+                setIsLoading(false); // 로딩 종료
             }
         };
 
         fetchData();
     }, [currentYear]);
+
+    if (isLoading) {
+        return <Loading />;
+    }
 
     return (
         <div className='bg-white p-4 rounded-md'>
@@ -205,7 +220,7 @@ const YearlyDashboard = () => {
                         
                     ))
                 ) : (
-                    <Loading />
+                    <div></div>
                 )}
             </div>
         </div>

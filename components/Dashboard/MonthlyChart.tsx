@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { UserContext  } from '@/context/UserContext'
 
 interface Content {
     날짜: string;
@@ -21,27 +22,28 @@ interface MonthlyChartProps {
 const MonthlyChart = ({ currentDate }: MonthlyChartProps) => {
     const [dataResult, setDataResult] = useState<Content[]>([]);
 
+    const contextUser = useContext(UserContext);
+    if (!contextUser) {
+        throw new Error('userInfo must be used within a SelectedLawdCodeContext.Provider');
+    }
+    const { user, setUser } = contextUser;
+
     useEffect(() => {
+        
         const fetchData = async () => {
             try {        
-                const today = currentDate;
-                const year = today.getFullYear();
-                const month = String(today.getMonth() + 1).padStart(2, '0');
-                const day = String(today.getDate()).padStart(2, '0');
-                const nowDate = `${year}-${month}-${day}`;
-
                 const res = await fetch('/api/connect?query=GD_USER_STATS_SELECT', {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         SelType: '차트',
-                        InsDate: nowDate,
-                        // InsDate: new Date().toISOString().split('T')[0],
-                        UserId: 'MEGA4143',
+                        InsDate: currentDate,                        
+                        UserId: user?.userID,
                     }),
                 });
                 const sqlData = await res.json();
                 setDataResult(sqlData[0]);
+
             } catch (error) {
                 console.error('Error:', error);
             }

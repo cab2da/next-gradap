@@ -5,7 +5,6 @@ import React from 'react';
 import { IoHomeSharp } from "react-icons/io5";
 import { usePathname } from 'next/navigation';
 import { useRouter } from 'next/navigation';
-// import { UserContext } from '@/context/UserContext';
 
 function Navbar() {
     const router = useRouter();
@@ -18,7 +17,7 @@ function Navbar() {
 
           if (response.ok) {
             // 홈 화면으로 이동
-            router.push('/');
+            router.push('/nd');
           } else {
             console.error('Logout failed:', response.status);
           }
@@ -31,17 +30,19 @@ function Navbar() {
   return (
     <div className='flex flex-row w-full h-[63px] items-center justify-between px-10 py-4 bg-white border-t-[1px] border-[#F4F4F4]'>
 
-        <Link href='/mega' className={`flex flex-col items-center gap-1 ${pathname === '/mega' ? 'text-sky-600' : 'text-gray-600'} `}>
+        <Link href='/nd/mega' className={`flex flex-col items-center gap-1 ${pathname === '/nd/mega' ? 'text-sky-600' : 'text-gray-600'} `}>
             <IoHomeSharp size="18" />
             <span className={`text-[12px] font-semibold`}>HOME</span>
         </Link>      
         
-        <Link href='/mega/Dashboard/Weekly' className={`flex flex-col items-center gap-1 ${pathname === '/mega/Dashboard/Weekly' ? 'text-sky-600' : 'text-gray-600'} `}>
+        <Link href='/nd/mega/Dashboard/Weekly' className={`flex flex-col items-center gap-1 
+          ${pathname.startsWith('/nd/mega/Dashboard/') ? 'text-sky-600' : 'text-gray-600'} `}>
             <Sigma size={18} />
             <span className={`text-[12px] font-semibold`}>통계</span>
         </Link>
         
-        <Link href='/mega/Stately/Info' className={`flex flex-col items-center gap-1 ${pathname === '/mega/Stately/Info' ? 'text-sky-600' : 'text-gray-600'} `}>
+        <Link href='/nd/mega/Stately/Info' className={`flex flex-col items-center gap-1 
+          ${pathname.startsWith('/nd/mega/Stately/') ? 'text-sky-600' : 'text-gray-600'} `}>
             <Wand size={18} />
             <span className={`text-[12px] font-semibold`}>상태</span>
         </Link>

@@ -14,6 +14,7 @@ import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import { MdPushPin } from "react-icons/md";
 import Loading from "@/app/loading";
+import { AlertDialogDemo } from "@/components/Alert-dialog";
 
 
 interface DataResultReport {
@@ -36,10 +37,15 @@ const StatelyDetail = () => {
     const [dataResultReportBefore, setDataResultReportBefore] = useState<DataResultReport[]>([]);
 
     const [refresh, setRefresh] = useState(false);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [desc, setDesc ] = useState('');
+    const [isLoading, setIsLoading] = useState(false); // 로딩 상태 
 
     useEffect(() => {
         const fetchData = async () => {
             try {
+                setIsLoading(true); // 로딩 시작
+
                 const storedProcName = "GD_REPORT_Now";
                 const params = {};
 
@@ -58,6 +64,8 @@ const StatelyDetail = () => {
 
             } catch (error) {
                 console.error('Error:', error);
+            } finally {
+                setIsLoading(false); // 로딩 종료
             }
         };
 
@@ -71,13 +79,13 @@ const StatelyDetail = () => {
         // Adjust to local time
         const localDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
 
-        const month = localDate.getMonth() + 1;
-        const day = localDate.getDate();
-        const hours = localDate.getHours();
+        const month = (localDate.getMonth() + 1).toString().padStart(2, '0');
+        const day = localDate.getDate().toString().padStart(2, '0');
+        const hours = localDate.getHours().toString().padStart(2, '0');
         const minutes = localDate.getMinutes().toString().padStart(2, '0');
         const seconds = localDate.getSeconds().toString().padStart(2, '0');
 
-        return `${month}월 ${day}일 ${hours}:${minutes}:${seconds}`;
+        return `${month}/${day} ${hours}:${minutes}`;
     };
 
 
@@ -98,7 +106,7 @@ const StatelyDetail = () => {
 
     // 보고서 컬럼 정보
     const [ReportColumnDefs] = useState<ColDef[]>([
-        { field: "_date", headerName: "생성일시", tooltipField: "_date", minWidth: 130, maxWidth: 130, cellClass: 'custom-cell', 
+        { field: "_date", headerName: "생성일시", tooltipField: "_date", minWidth: 100, maxWidth: 100, cellClass: 'custom-cell', 
             cellRenderer: (params: any) => {                
                 return params? formatDate(params.value) : '';
             }
@@ -118,6 +126,19 @@ const StatelyDetail = () => {
         }
     }, []);
 
+    // Ag Grid 셀 클릭 이벤트
+    const onCellClicked = (params: any) => {
+        if (params.colDef.field === "sp_reason" || params.colDef.field === "user_name" || params.colDef.field === "enpNm") {
+
+            setIsDialogOpen(true);
+            setDesc(`${params.value}`);
+        }
+      };
+
+
+    if (isLoading) {
+        return <Loading />;
+    }
     return (
         <div className='px-2 pt-6 pb-20 w-full h-full'>
             {dataResultCratop.length > 0 ? (
@@ -135,7 +156,8 @@ const StatelyDetail = () => {
                                 rowHeight={36}
                                 columnDefs={CratopColumnDefs} 
                                 defaultColDef={defaultColDef}
-                                tooltipShowDelay={500}                    
+                                tooltipShowDelay={0} //툴팁 바로 표시
+                                onCellClicked={onCellClicked} // 클릭 이벤트 핸들러                    
                                 // domLayout="autoHeight"
                                 localeText={{noRowsToShow: '조회 결과가 없습니다.'}}
                             />
@@ -150,7 +172,7 @@ const StatelyDetail = () => {
                             {/* 보고서 생성 대기 현황 */}
                             <div className="mt-4 space-y-2 h-[40%] mb-10">
                                 <div className="flex flex-row items-center gap-2">
-                                    <MdPushPin size={16} color="#0EA5E9" className="translate-y-1"/>
+                                    <MdPushPin size={16} color="#0EA5E9" className="translate-y-0.5"/>
                                     <h1 className="font-bold opacity-80">보고서 생성 대기 현황</h1>
                                 </div>
 
@@ -160,7 +182,8 @@ const StatelyDetail = () => {
                                         rowHeight={36}
                                         columnDefs={ReportColumnDefs} 
                                         defaultColDef={defaultColDef}
-                                        tooltipShowDelay={500}                    
+                                        tooltipShowDelay={0} //툴팁 바로 표시
+                                        onCellClicked={onCellClicked} // 클릭 이벤트 핸들러                            
                                         // domLayout="autoHeight"
                                         localeText={{noRowsToShow: '대기중인 보고서가 없습니다.'}}
                                     />
@@ -170,7 +193,7 @@ const StatelyDetail = () => {
                             {/* 직전 보고서 생성 현황 */}
                             <div className="mt-4 space-y-2 h-[50%] pb-10">
                                 <div className="flex flex-row items-center gap-2">
-                                    <MdPushPin size={16} color="#0EA5E9" className="translate-y-1"/>
+                                    <MdPushPin size={16} color="#0EA5E9" className="translate-y-0.5"/>
                                     <h1 className="font-bold opacity-80">직전 보고서 생성 현황 (최근 10건)</h1>
                                 </div>
 
@@ -180,7 +203,8 @@ const StatelyDetail = () => {
                                         rowHeight={36}
                                         columnDefs={ReportColumnDefs} 
                                         defaultColDef={defaultColDef}
-                                        tooltipShowDelay={500}                    
+                                        tooltipShowDelay={0} //툴팁 바로 표시
+                                        onCellClicked={onCellClicked} // 클릭 이벤트 핸들러      
                                         // domLayout="autoHeight"
                                         localeText={{noRowsToShow: '직전에 생성된 보고서가 없습니다.'}}
                                     />
@@ -192,9 +216,14 @@ const StatelyDetail = () => {
                 </Tabs>
                 ) :
                 (
-                    <Loading />
+                    <div></div>
                 )
              }
+
+             {isDialogOpen && (
+            <AlertDialogDemo isOpen={isDialogOpen} title="상세정보"  content = {desc} onClose={() => setIsDialogOpen(false)} />
+            )}
+
         </div>
     );
 }

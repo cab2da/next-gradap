@@ -4,8 +4,9 @@
 import Loading from '@/app/loading';
 
 import { addWeeks, startOfWeek, endOfWeek, getISOWeek } from 'date-fns';
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { FaArrowCircleLeft, FaArrowCircleRight } from "react-icons/fa";
+import { UserContext  } from '@/context/UserContext'
 
 interface Content {
     날짜: string;
@@ -26,7 +27,6 @@ const WeeklyDashboard = () => {
     
     // 오늘 날짜 기준으로 시작
     const [currentDate, setCurrentDate] = useState(new Date());
-
 
     // 주간 범위와 주차 번호를 계산하는 함수
     const getWeekRange = (date: Date) => {
@@ -56,10 +56,19 @@ const WeeklyDashboard = () => {
       setCurrentDate(prevDate => addWeeks(prevDate, 1));
     };
 
+    const contextUser = useContext(UserContext);
+    if (!contextUser) {
+        throw new Error('userInfo must be used within a SelectedLawdCodeContext.Provider');
+    }
+    const { user, setUser } = contextUser;
+    const [isLoading, setIsLoading] = useState(false); // 로딩 상태 
     
     useEffect(() => {
         const fetchData = async () => {
-            try {        
+            try {       
+                
+                setIsLoading(true); // 로딩 시작
+
                 const today = currentDate;
                 const year = today.getFullYear();
                 const month = String(today.getMonth() + 1).padStart(2, '0');
@@ -70,7 +79,7 @@ const WeeklyDashboard = () => {
                 const params = {
                     SelType: '주간',
                     InsDate: nowDate,
-                    UserId: 'MEGA4143',
+                    UserId: user?.userID,
                 };
         
                 const res = await fetch(`/api/connect?query=${storedProcName}`, {
@@ -86,6 +95,8 @@ const WeeklyDashboard = () => {
 
             } catch (error) {
                 console.error('Error:', error);
+            } finally {
+                setIsLoading(false); // 로딩 종료
             }
         };
 
@@ -93,6 +104,9 @@ const WeeklyDashboard = () => {
 
     }, [currentDate]);
 
+    if (isLoading) {
+        return <Loading />;
+      }
     return (
         <div className='bg-white p-4 rounded-md'>
             <div className="flex flex-row items-center gap-1">
@@ -104,7 +118,7 @@ const WeeklyDashboard = () => {
                 <FaArrowCircleRight color='#4738a2' />
               </button>
             </div>
-            {dataResult.length > 0 ? (
+            {dataResult && dataResult.length > 0 ? (
                 dataResult.map((item, index) => (
                     <div key={index} >
 
@@ -160,7 +174,7 @@ const WeeklyDashboard = () => {
                     
                 ))
                 ) : (
-                    <Loading />
+                    <div></div>
                 )}
             
         </div>

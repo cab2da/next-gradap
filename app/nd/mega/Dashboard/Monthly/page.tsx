@@ -1,7 +1,8 @@
 
 "use client";
 
-import { useEffect, useState  } from "react";
+import { useEffect, useState, useContext  } from "react";
+import { UserContext  } from '@/context/UserContext'
 import { format, addMonths, subMonths } from "date-fns";
 import MonthlyChart from "@/components/Dashboard/MonthlyChart";
 import Loading from "@/app/loading";
@@ -46,9 +47,18 @@ const MonthlyDashboard = () => {
         setCurrentDate((prevDate) => addMonths(prevDate, 1));
     };
     
+    const contextUser = useContext(UserContext);
+    if (!contextUser) {
+        throw new Error('userInfo must be used within a SelectedLawdCodeContext.Provider');
+    }
+    const { user, setUser } = contextUser;
+    const [isLoading, setIsLoading] = useState(false); // 로딩 상태 
+
     useEffect(() => {
         const fetchData = async () => {
             try {  
+                setIsLoading(true); // 로딩 시작
+
                 const today = currentDate;
                 const year = today.getFullYear();
                 const month = String(today.getMonth() + 1).padStart(2, '0');
@@ -74,7 +84,7 @@ const MonthlyDashboard = () => {
                 const params = {
                     SelType: '월간',
                     InsDate: nowDate,
-                    UserId: 'MEGA4143',
+                    UserId: user?.userID,
                 };
         
                 const res = await fetch(`/api/connect?query=${storedProcName}`, {
@@ -89,11 +99,17 @@ const MonthlyDashboard = () => {
 
             } catch (error) {
                 console.error('Error:', error);
+            } finally {
+                setIsLoading(false); // 로딩 종료
             }
         };
 
         fetchData();
     }, [currentDate]);
+
+    if (isLoading) {
+        return <Loading />;
+      }
 
     return (
         <div className='bg-white p-4 rounded-md'>
@@ -211,7 +227,7 @@ const MonthlyDashboard = () => {
                         </div>
                     ))
                 ) : (
-                    <Loading />
+                    <div></div>
                 )}
             </div>
         </div>
