@@ -6,7 +6,7 @@ import Loading from '@/app/loading';
 import { addWeeks, startOfWeek, endOfWeek, getISOWeek } from 'date-fns';
 import { useContext, useEffect, useState } from "react";
 import { FaArrowCircleLeft, FaArrowCircleRight } from "react-icons/fa";
-import { UserContext  } from '@/context/UserContext'
+import { UserSubContext  } from '@/context/UserSubContext'
 
 interface Content {
     날짜: string;
@@ -56,11 +56,11 @@ const WeeklyDashboard = () => {
       setCurrentDate(prevDate => addWeeks(prevDate, 1));
     };
 
-    const contextUser = useContext(UserContext);
-    if (!contextUser) {
+    const contextUserSub = useContext(UserSubContext);
+    if (!contextUserSub) {
         throw new Error('userInfo must be used within a SelectedLawdCodeContext.Provider');
     }
-    const { user, setUser } = contextUser;
+    const { userSub, setUserSub } = contextUserSub;
     const [isLoading, setIsLoading] = useState(false); // 로딩 상태 
     
     useEffect(() => {
@@ -79,7 +79,7 @@ const WeeklyDashboard = () => {
                 const params = {
                     SelType: '주간',
                     InsDate: nowDate,
-                    UserId: user?.userID,
+                    UserId: userSub?.userID,
                 };
         
                 const res = await fetch(`/api/connect?query=${storedProcName}`, {
@@ -100,16 +100,19 @@ const WeeklyDashboard = () => {
             }
         };
 
-        fetchData();
+        if (userSub) {
+            fetchData();
+        }
 
     }, [currentDate]);
 
     if (isLoading) {
         return <Loading />;
-      }
+    }
+    else {
     return (
         <div className='bg-white p-4 rounded-md'>
-            <div className="flex flex-row items-center gap-1">
+            <div className="flex flex-row items-center gap-2">
               <button onClick={handlePreviousWeek}>
                 <FaArrowCircleLeft color='#4738a2' />
               </button>
@@ -174,11 +177,12 @@ const WeeklyDashboard = () => {
                     
                 ))
                 ) : (
-                    <div></div>
+                    <p className="pt-4">데이터가 없습니다.</p>
                 )}
             
         </div>
     );
+}
 }
 
 export default WeeklyDashboard;

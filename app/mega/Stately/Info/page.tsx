@@ -1,7 +1,9 @@
 "use client";
 
 import Loading from "@/app/loading";
+import { AlertDialogYN } from "@/components/Alert-dialog";
 import StateCard from "@/components/StateCard";
+import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 
 interface DataResult {
@@ -15,6 +17,8 @@ const StatelyCInfo = () => {
     const [refresh, setRefresh] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
     const [isLoading, setIsLoading] = useState(false); // 로딩 상태 
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isDialogOpenDB, setIsDialogOpenDB] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -42,12 +46,11 @@ const StatelyCInfo = () => {
         };
 
         fetchData();
-        setRefresh(false);
+        // setRefresh(false);
     }, [refresh]);
 
     const handleCretop = async () => {
         if (isProcessing) return; // 이미 요청 중이면 함수 종료
-
         setIsProcessing(true);
 
         try {
@@ -67,7 +70,6 @@ const StatelyCInfo = () => {
             }
 
             const data = await res.json();
-            // console.log('Stored procedure result:', data);
 
             setRefresh(true);   // 새로고침 용도
         } catch (error) {
@@ -75,7 +77,7 @@ const StatelyCInfo = () => {
         } finally {
             setIsProcessing(false); // 요청 완료 후 플래그 리셋
         }
-    };
+    }
 
     const handleMssql = async () => {
         try {
@@ -100,10 +102,14 @@ const StatelyCInfo = () => {
     if (isLoading) {
         return <Loading />;
     }
-
-    return (
+    else {
+        return (
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 px-4 pt-4 pb-20 gap-4 bg-gray-50'>
-                {dataResult.length > 0 ? (
+                <div className="flex justify-end -mb-2">
+                    <Button variant='outline' onClick={()=> setRefresh(!refresh)}>새로고침</Button>
+                </div>
+
+                {dataResult && dataResult.length > 0 ? (
                     <>
                         <StateCard
                             title="크레탑"
@@ -111,7 +117,7 @@ const StatelyCInfo = () => {
                             txt1={`등록된 ID : ${dataResult[0]?.[0]?.TotalCount ?? 0} 개`}
                             txt2={`사용 가능 ID : ${dataResult[0]?.[0]?.PossibleCount ?? 0} 개`}
                             buttons={[
-                                { label: '임시조치', onClick: () => handleCretop() },
+                                { label: '임시조치', onClick: () => setIsDialogOpen(true) },
                             ]}
                         />
                         
@@ -121,21 +127,42 @@ const StatelyCInfo = () => {
                             txt1={`DB 할당량 : 600 MB`}
                             txt2={`DB 사용량 : ${dataResult[3]?.[0]?.TABLE_SIZE ?? ''} MB`}
                             buttons={[
-                                { label: '임시조치', onClick: () => handleMssql() },
+                                { label: '임시조치', onClick: () => setIsDialogOpenDB(true) },
                             ]} />
                         
                         <StateCard
                             title="보고서 생성 대기"
                             description="보고서 생성을 요청하고 대기 중인 건수를 제공합니다."
-                            txt1={`대기 건수 : ${dataResult[1]?.Lenth ?? 0} 건`}
+                            txt1={`대기 건수 : ${dataResult[1]?.length} 건`}
                             txt2='' />
                     </>
                 ):(
-                    <div></div>
+                    <p className="pt-4">데이터가 없습니다.</p>
                 )}
+
+                {isDialogOpen && (
+                    <AlertDialogYN 
+                        isOpen={isDialogOpen} 
+                        title="크레탑 상태 업데이트"  content = "실행하면 복구가 불가능합니다. 실행하시겠습니까?"
+                        onAction={() => handleCretop()} 
+                        onClose={() => setIsDialogOpen(false)} 
+                    />
+                )}
+
+                {isDialogOpenDB && (
+                    <AlertDialogYN 
+                        isOpen={isDialogOpenDB} 
+                        title="MS SQL DB 상태 업데이트"  content = "실행하면 복구가 불가능합니다. 실행하시겠습니까?"
+                        onAction={() => handleMssql()} 
+                        onClose={() => setIsDialogOpenDB(false)} 
+                    />
+                )}
+
+
             </div>
-       
-    );
+        
+        );
+    }
 }
 
 export default StatelyCInfo;

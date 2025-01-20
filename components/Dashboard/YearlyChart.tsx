@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
-import { UserContext  } from '@/context/UserContext'
+import { UserSubContext  } from '@/context/UserSubContext'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 interface Content {
@@ -19,11 +19,11 @@ interface YearlyChartProps {
 
 const YearlyChart = ({ currentDate }: YearlyChartProps) => {
     const [dataResult, setDataResult] = useState<Content[]>([]);
-    const contextUser = useContext(UserContext);
-    if (!contextUser) {
+    const contextUserSub = useContext(UserSubContext);
+    if (!contextUserSub) {
         throw new Error('userInfo must be used within a SelectedLawdCodeContext.Provider');
     }
-    const { user, setUser } = contextUser;
+    const { userSub, setUserSub } = contextUserSub;
 
     useEffect(() => {
         const fetchData = async () => {
@@ -34,7 +34,7 @@ const YearlyChart = ({ currentDate }: YearlyChartProps) => {
                     body: JSON.stringify({
                         SelType: '차트_년',
                         InsDate: currentDate,
-                        UserId: user?.userID,
+                        UserId: userSub?.userID,
                     }),
                 });
                 const sqlData = await res.json();
@@ -45,7 +45,9 @@ const YearlyChart = ({ currentDate }: YearlyChartProps) => {
             }
         };
 
-        fetchData();
+        if (userSub) {
+            fetchData();
+        }
     }, [currentDate]);
 
     return (
@@ -55,17 +57,20 @@ const YearlyChart = ({ currentDate }: YearlyChartProps) => {
                     data={dataResult}
                     margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
                 >
-                    <CartesianGrid strokeDasharray="3 3" />
+                    <CartesianGrid 
+                        strokeDasharray="3 3" 
+                        vertical={false} // 세로 눈금선 숨기기
+                    />  
                     <XAxis 
                         dataKey="날짜" 
                         axisLine={true} 
                         tick={{fill:"#0a0b0b", fontSize: 12}} 
-                        tickLine={false} 
+                        tickLine={true} 
                         tickMargin={6}
                         // interval="preserveStartEnd" 
                         // scale="point" 
                         angle={-45} textAnchor="end"
-                        // padding={{ left:50, right:50}}
+                        padding={{ left:20, right:20}}
                     />
                     <YAxis 
                         tick={{fill:"#0a0b0b", fontSize: 14}} 

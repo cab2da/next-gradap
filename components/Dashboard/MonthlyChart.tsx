@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { UserContext  } from '@/context/UserContext'
+import { UserSubContext  } from '@/context/UserSubContext'
 
 interface Content {
     날짜: string;
@@ -22,11 +22,11 @@ interface MonthlyChartProps {
 const MonthlyChart = ({ currentDate }: MonthlyChartProps) => {
     const [dataResult, setDataResult] = useState<Content[]>([]);
 
-    const contextUser = useContext(UserContext);
-    if (!contextUser) {
+    const contextUserSub = useContext(UserSubContext);
+    if (!contextUserSub) {
         throw new Error('userInfo must be used within a SelectedLawdCodeContext.Provider');
     }
-    const { user, setUser } = contextUser;
+    const { userSub, setUserSub } = contextUserSub;
 
     useEffect(() => {
         
@@ -38,7 +38,7 @@ const MonthlyChart = ({ currentDate }: MonthlyChartProps) => {
                     body: JSON.stringify({
                         SelType: '차트',
                         InsDate: currentDate,                        
-                        UserId: user?.userID,
+                        UserId: userSub?.userID,
                     }),
                 });
                 const sqlData = await res.json();
@@ -49,7 +49,9 @@ const MonthlyChart = ({ currentDate }: MonthlyChartProps) => {
             }
         };
 
-        fetchData();
+        if (userSub) {
+            fetchData();
+        }
     }, [currentDate]);
 
     return (
@@ -59,17 +61,25 @@ const MonthlyChart = ({ currentDate }: MonthlyChartProps) => {
                     data={dataResult}
                     margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
                 >
-                    <CartesianGrid strokeDasharray="3 3" />
+                    {/* 배경 그리드 */}
+                    <CartesianGrid 
+                        strokeDasharray="3 3" 
+                        vertical={false} // 세로 눈금선 숨기기
+                    />  
+                     {/* X축 설정 */}
                     <XAxis 
                         dataKey="날짜" 
-                        axisLine={true} 
                         tick={{fill:"#0a0b0b", fontSize: 14, textAnchor: 'middle'}} 
-                        tickLine={false} 
                         tickMargin={10}
+                        type="category"
                         interval="preserveStartEnd" 
                         scale="point" 
-                        // padding={{ left:50, right:50}}
+                        padding={{ left:50, right:50}}
+                        axisLine={true} // X축 선 숨기기
+                        tickLine={true} // X축 눈금선 숨기기
                     />
+
+                     {/* Y축 설정 */}
                     <YAxis 
                         tick={{fill:"#0a0b0b", fontSize: 14}} 
                         tickFormatter={(value) => `${value}%`}
@@ -84,7 +94,7 @@ const MonthlyChart = ({ currentDate }: MonthlyChartProps) => {
                         contentStyle={{ fontSize: '14px', backgroundColor: '#fff', border: '1px solid #ddd' }} 
                         itemStyle={{ fontSize: '14px' }} 
                     />
-
+                    {/* 선 그래프 */}
                     <Line type="monotone" dataKey="보고서다운로드증감율" stroke="#d1a1d1" strokeWidth={1} 
                         dot={{ 
                             stroke: '#d1a1d1',   // 점 색상

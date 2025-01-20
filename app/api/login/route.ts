@@ -1,8 +1,17 @@
 // app/api/login/route.ts
 
 import { NextResponse } from 'next/server'
+import jwt from 'jsonwebtoken';
+
+const SECRET_KEY = process.env.SESSION_SECRET
+// const encodedKey = new TextEncoder().encode(SECRET_KEY)
 
 export async function POST(req: Request) {
+
+  
+
+  // 토큰 생성
+  // const token = 'secure_token_wlstjtkfkd';
 
   try {
     // 1. 요청에서 이메일 및 비밀번호 추출
@@ -32,17 +41,30 @@ export async function POST(req: Request) {
 
       if (result[0].result === '성공')
       {
+        // JWT 토큰 생성 (유저 정보 포함)
+        const token = jwt.sign(
+          // 유저 정보
+          { userID: userID,
+            userName: result[0].user_name, 
+            userDepart: result[0].user_depart, 
+            userLevel: result[0].user_level,
+          }, 
+          SECRET_KEY || '', // 서명 키
+          { expiresIn: '1d' } // 토큰 만료 시간
+        );
+
+        // 토큰을 HttpOnly 쿠키에 저장
         const response = NextResponse.json({ 
           success: true,
           message: "로그인 성공",
           result, // result 포함
         })
-        response.cookies.set('gradap21-token', 'some-auth-token', {
+        response.cookies.set('gradap21-token', token, {
           httpOnly: true,
-          maxAge: 60 * 60 * 24, // 1 day
-          path: '/', // 모든 경로에 대해 쿠키 적용
-          secure: process.env.NODE_ENV === 'production', // 배포 환경에서만 secure 플래그 적용
-        })
+          secure: process.env.NODE_ENV === 'production',
+          path: '/',
+          maxAge: 60 * 60 * 24, // 1일
+        });
         return response
   
       } else {
@@ -52,7 +74,7 @@ export async function POST(req: Request) {
           message: '로그인 실패',
           result, 
          })
-        response.cookies.set('gradap21-token', 'some-auth-token', {
+        response.cookies.set('gradap21-token', '', {
           httpOnly: true,
           maxAge: 0,  
           path: '/',
@@ -69,7 +91,7 @@ export async function POST(req: Request) {
         success: false, 
         message: "서버 에러가 발생했습니다.",
        })
-      response.cookies.set('gradap21-token', 'some-auth-token', {
+      response.cookies.set('gradap21-token', '', {
           httpOnly: true,
           maxAge: 0,  
           path: '/',
