@@ -13,10 +13,11 @@ const notoSansKr = Noto_Sans_KR({
 });
 
 export const metadata: Metadata = {
-  title: "Gradap",
+  title: "그래! 그래! 그레답!",
   description: "그래! 그래 답 홈페이지 입니다",
   icons: {
-    icon: '/logo192.png',
+    icon: '/favicon.ico',
+    // icon: '/logo192.png',
     apple: '/logo192.png',
   },
   manifest: '/manifest.json',
