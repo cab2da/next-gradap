@@ -26,8 +26,10 @@ export default function Home() {
       const { success, message, result } = await res.json();
       
       if (success) {
+        console.log("로그인 성공")
         router.push('/mega');
       } else {
+        console.log("로그인 실패")
         setIsDialogOpen(true);
         setDesc("아이디와 비밀번호를 확인하세요.")
       }
