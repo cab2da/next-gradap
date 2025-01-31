@@ -17,7 +17,6 @@ export const metadata: Metadata = {
   description: "그래! 그래 답 홈페이지 입니다",
   icons: {
     icon: '/favicon.ico',
-    // icon: '/logo192.png',
     apple: '/logo192.png',
   },
   manifest: '/manifest.json',
@@ -30,13 +29,17 @@ export default function RootLayout({
 }>) {
 
   return (
-    <html lang="ko"  suppressHydrationWarning>
+    <html 
+      lang="ko"
+      className={notoSansKr.className}
+      suppressHydrationWarning>
         
-      <body className={notoSansKr.className}>
+      <body>
           <Suspense fallback={<Loading />}>
-            {children}
 
-            <div className="fixed bottom-0 left-0 right-0 z-50">
+            {children}
+            
+            <div className="fixed min-w-[500px] bottom-0 left-0 right-0 z-50">
               <Navbar />
             </div>
 

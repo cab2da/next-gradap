@@ -1,8 +1,8 @@
 
 "use client";
 
-import { useEffect, useState, useContext  } from "react";
-import { UserSubContext  } from '@/context/UserSubContext'
+import { useEffect, useState, useContext } from "react";
+import { UserSubContext } from '@/context/UserSubContext'
 import { format, addMonths, subMonths } from "date-fns";
 import MonthlyChart from "@/components/Dashboard/MonthlyChart";
 import Loading from "@/app/loading";
@@ -46,7 +46,7 @@ const MonthlyDashboard = () => {
     const handleNextMonth = () => {
         setCurrentDate((prevDate) => addMonths(prevDate, 1));
     };
-    
+
     const contextUserSub = useContext(UserSubContext);
     if (!contextUserSub) {
         throw new Error('userInfo must be used within a SelectedLawdCodeContext.Provider');
@@ -54,9 +54,11 @@ const MonthlyDashboard = () => {
     const { userSub, setUserSub } = contextUserSub;
     const [isLoading, setIsLoading] = useState(false); // 로딩 상태 
 
+    const SERVERURL = process.env.NEXT_PUBLIC_API_SERVERURL;
+
     useEffect(() => {
         const fetchData = async () => {
-            try {  
+            try {
                 setIsLoading(true); // 로딩 시작
 
                 const today = currentDate;
@@ -80,22 +82,31 @@ const MonthlyDashboard = () => {
                 };
                 setPrevMonthRange(`${formatDate(firstDayOfPrevMonth)} ~ ${formatDate(lastDayOfPrevMonth)} 대비`);
 
-                const storedProcName = "GD_USER_STATS_SELECT";
-                const params = {
-                    SelType: '월간',
-                    InsDate: nowDate,
-                    UserId: userSub?.userID,
-                };
-        
-                const res = await fetch(`/api/connect?query=${storedProcName}`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(params),
-                });
-                const sqlData = await res.json();
-                setDataResult(sqlData[0]); // 전체 결과를 상태로 설정합니다
+
+                const API_URL = `${SERVERURL}/gradap/dashboard/monthly?SelType=월간&InsDate=${nowDate}&UserId=${userSub?.userID}`;
+
+                const res = await fetch(API_URL);
+                const response = await res.json();
+
+                setDataResult(response);
+
+                // const storedProcName = "GD_USER_STATS_SELECT";
+                // const params = {
+                //     SelType: '월간',
+                //     InsDate: nowDate,
+                //     UserId: userSub?.userID,
+                // };
+
+                // const res = await fetch(`/api/connect?query=${storedProcName}`, {
+                //     method: "POST",
+                //     headers: {
+                //         "Content-Type": "application/json",
+                //         Connection: 'keep-alive', // 연결 유지
+                //     },
+                //     body: JSON.stringify(params),
+                // });
+                // const sqlData = await res.json();
+                // setDataResult(sqlData[0]); // 전체 결과를 상태로 설정합니다
 
             } catch (error) {
                 console.error('Error:', error);
@@ -111,130 +122,130 @@ const MonthlyDashboard = () => {
 
     if (isLoading) {
         return <Loading />;
-      }
+    }
     else {
-    return (
-        <div className='bg-white p-4 rounded-md'>
-            <div className="flex flex-col justify-start">
+        return (
+            <div className='bg-white p-4 rounded-md'>
+                <div className="flex flex-col justify-start">
 
-            <div className="flex flex-row items-center gap-1">
-              <button onClick={handlePreviousMonth}>
-                <FaArrowCircleLeft color='#4738a2' />
-              </button>
-              <p className="text-sm font-bold text-neutral-800">{format(currentDate, "yyyy년 MM월")}</p>
-              <button onClick={handleNextMonth}>
-                <FaArrowCircleRight color='#4738a2' />
-              </button>
+                    <div className="flex flex-row items-center gap-1">
+                        <button onClick={handlePreviousMonth}>
+                            <FaArrowCircleLeft color='#4738a2' />
+                        </button>
+                        <p className="text-sm font-bold text-neutral-800">{format(currentDate, "yyyy년 MM월")}</p>
+                        <button onClick={handleNextMonth}>
+                            <FaArrowCircleRight color='#4738a2' />
+                        </button>
+                    </div>
+                    {dataResult && dataResult.length > 0 ? (
+                        <MonthlyChart currentDate={currentDate} />
+                    ) : (
+                        <p className="pt-4">데이터가 없습니다.</p>
+                    )}
+
+                    {dataResult && dataResult.length > 0 ? (
+                        dataResult.map((item, index) => (
+                            <div key={index} >
+
+                                {/* 기업보고서 */}
+                                <h1 className="font-bold text-gray-700 mt-4 mb-1 ">기업보고서</h1>
+                                <p className="text-sm text-[#6c757d] border-b-[2px] pb-2">{prevMonthRange}</p>
+
+                                <div className="flex flex-row justify-between border-b-[1px] p-2">
+                                    <div className="flex items-center text-[#6c757d]">
+                                        <span className="text-sm">기업 진단보고서 다운로드</span>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="flex justify-end pr-2 text-sm text-[#6c757d]">{item.보고서다운로드}건</span>
+                                        <span className="flex justify-end pr-2 text-sm text-[#adb5bd]">{item.보고서다운로드증감율}%</span>
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-row justify-between border-b-[1px] p-2">
+                                    <div className="flex items-center text-[#6c757d]">
+                                        <span className="text-sm">메모</span>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="flex justify-end pr-2 text-sm text-[#6c757d]">{item.메모}건</span>
+                                        <span className="flex justify-end pr-2 text-sm text-[#adb5bd]">{item.메모증감율}%</span>
+                                    </div>
+                                </div>
+
+
+                                {/* 조언요청 */}
+                                <h1 className="font-bold text-gray-700  mt-6 mb-1 ">조언요청</h1>
+
+                                <p className="text-sm text-[#6c757d] border-b-[2px] pb-2">{prevMonthRange}</p>
+
+                                <div className="flex flex-row justify-between border-b-[1px] p-2">
+                                    <div className="flex items-center text-[#6c757d]">
+                                        <span className="text-sm">상급자 일반 조언요청</span>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="flex justify-end pr-2 text-sm text-[#6c757d]">{item.상급자조언코칭}건</span>
+                                        <span className="flex justify-end pr-2 text-sm text-[#adb5bd]">{item.상급자조언코칭증감율}%</span>
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-row justify-between border-b-[1px] p-2">
+                                    <div className="flex items-center text-[#6c757d]">
+                                        <span className="text-sm">전문가 일반 조언요청</span>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="flex justify-end pr-2 text-sm text-[#6c757d]">{item.전문가조언코칭}건</span>
+                                        <span className="flex justify-end pr-2 text-sm text-[#adb5bd]">{item.전문가조언코칭증감율}%</span>
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-row justify-between border-b-[1px] p-2">
+                                    <div className="flex items-center text-[#6c757d]">
+                                        <span className="text-sm">상급자 기업 조언요청</span>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="flex justify-end pr-2 text-sm text-[#6c757d]">{item.상급자조언요청}건</span>
+                                        <span className="flex justify-end pr-2 text-sm text-[#adb5bd]">{item.상급자조언요청증감율}%</span>
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-row justify-between border-b-[1px] p-2">
+                                    <div className="flex items-center text-[#6c757d]">
+                                        <span className="text-sm">전문가 기업 조언요청</span>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="flex justify-end pr-2 text-sm text-[#6c757d]">{item.전문가조언요청}건</span>
+                                        <span className="flex justify-end pr-2 text-sm text-[#adb5bd]">{item.전문가조언요청증감율}%</span>
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-row justify-between border-b-[1px] p-2">
+                                    <div className="flex items-center text-[#6c757d]">
+                                        <span className="text-sm">상급자 코칭</span>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="flex justify-end pr-2 text-sm text-[#6c757d]">{item.상급자코칭}건</span>
+                                        <span className="flex justify-end pr-2 text-sm text-[#adb5bd]">{item.상급자코칭증감율}%</span>
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-row justify-between border-b-[2px] p-2">
+                                    <div className="flex items-center text-[#6c757d]">
+                                        <span className="text-sm">전문가  코칭</span>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="flex justify-end pr-2 text-sm text-[#6c757d]">{item.전문가코칭}건</span>
+                                        <span className="flex justify-end pr-2 text-sm text-[#adb5bd]">{item.전문가코칭증감율}%</span>
+                                    </div>
+                                </div>
+
+                            </div>
+                        ))
+                    ) : (
+                        <div></div>
+                    )}
+                </div>
             </div>
-                {dataResult && dataResult.length > 0 ? (
-                    <MonthlyChart currentDate={currentDate} />
-                ) : (
-                    <p className="pt-4">데이터가 없습니다.</p>
-                )}
-
-                {dataResult &&  dataResult.length > 0 ? (
-                    dataResult.map((item, index) => (
-                        <div key={index} >
-
-                            {/* 기업보고서 */}
-                            <h1 className="font-bold text-gray-700 mt-4 mb-1 ">기업보고서</h1>                                
-                            <p className="text-sm text-[#6c757d] border-b-[2px] pb-2">{prevMonthRange}</p>
-
-                            <div className="flex flex-row justify-between border-b-[1px] p-2">
-                                <div className="flex items-center text-[#6c757d]">
-                                    <span className="text-sm">기업 진단보고서 다운로드</span>
-                                </div>
-                                <div className="flex flex-col">
-                                    <span className="flex justify-end pr-2 text-sm text-[#6c757d]">{item.보고서다운로드}건</span>
-                                    <span className="flex justify-end pr-2 text-sm text-[#adb5bd]">{item.보고서다운로드증감율}%</span>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-row justify-between border-b-[1px] p-2">
-                                <div className="flex items-center text-[#6c757d]">
-                                    <span className="text-sm">메모</span>
-                                </div>
-                                <div className="flex flex-col">
-                                    <span className="flex justify-end pr-2 text-sm text-[#6c757d]">{item.메모}건</span>
-                                    <span className="flex justify-end pr-2 text-sm text-[#adb5bd]">{item.메모증감율}%</span>
-                                </div>
-                            </div>
-
-
-                            {/* 조언요청 */}
-                            <h1 className="font-bold text-gray-700  mt-6 mb-1 ">조언요청</h1>
-                                
-                            <p className="text-sm text-[#6c757d] border-b-[2px] pb-2">{prevMonthRange}</p>
-
-                            <div className="flex flex-row justify-between border-b-[1px] p-2">
-                                <div className="flex items-center text-[#6c757d]">
-                                    <span className="text-sm">상급자 일반 조언요청</span>
-                                </div>
-                                <div className="flex flex-col">
-                                    <span className="flex justify-end pr-2 text-sm text-[#6c757d]">{item.상급자조언코칭}건</span>
-                                    <span className="flex justify-end pr-2 text-sm text-[#adb5bd]">{item.상급자조언코칭증감율}%</span>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-row justify-between border-b-[1px] p-2">
-                                <div className="flex items-center text-[#6c757d]">
-                                    <span className="text-sm">전문가 일반 조언요청</span>
-                                </div>
-                                <div className="flex flex-col">
-                                    <span className="flex justify-end pr-2 text-sm text-[#6c757d]">{item.전문가조언코칭}건</span>
-                                    <span className="flex justify-end pr-2 text-sm text-[#adb5bd]">{item.전문가조언코칭증감율}%</span>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-row justify-between border-b-[1px] p-2">
-                                <div className="flex items-center text-[#6c757d]">
-                                    <span className="text-sm">상급자 기업 조언요청</span>
-                                </div>
-                                <div className="flex flex-col">
-                                    <span className="flex justify-end pr-2 text-sm text-[#6c757d]">{item.상급자조언요청}건</span>
-                                    <span className="flex justify-end pr-2 text-sm text-[#adb5bd]">{item.상급자조언요청증감율}%</span>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-row justify-between border-b-[1px] p-2">
-                                <div className="flex items-center text-[#6c757d]">
-                                    <span className="text-sm">전문가 기업 조언요청</span>
-                                </div>
-                                <div className="flex flex-col">
-                                    <span className="flex justify-end pr-2 text-sm text-[#6c757d]">{item.전문가조언요청}건</span>
-                                    <span className="flex justify-end pr-2 text-sm text-[#adb5bd]">{item.전문가조언요청증감율}%</span>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-row justify-between border-b-[1px] p-2">
-                                <div className="flex items-center text-[#6c757d]">
-                                    <span className="text-sm">상급자 코칭</span>
-                                </div>
-                                <div className="flex flex-col">
-                                    <span className="flex justify-end pr-2 text-sm text-[#6c757d]">{item.상급자코칭}건</span>
-                                    <span className="flex justify-end pr-2 text-sm text-[#adb5bd]">{item.상급자코칭증감율}%</span>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-row justify-between border-b-[2px] p-2">
-                                <div className="flex items-center text-[#6c757d]">
-                                    <span className="text-sm">전문가  코칭</span>
-                                </div>
-                                <div className="flex flex-col">
-                                    <span className="flex justify-end pr-2 text-sm text-[#6c757d]">{item.전문가코칭}건</span>
-                                    <span className="flex justify-end pr-2 text-sm text-[#adb5bd]">{item.전문가코칭증감율}%</span>
-                                </div>
-                            </div>
-
-                        </div>
-                    ))
-                ) : (
-                    <div></div>
-                )}
-            </div>
-        </div>
-    );
-}
+        );
+    }
 }
 
 export default MonthlyDashboard;

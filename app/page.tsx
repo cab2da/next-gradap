@@ -5,12 +5,15 @@ import { useRouter } from 'next/navigation'
 import { AlertDialogDemo } from "@/components/Alert-dialog";
 import Loading from "@/app/loading";
 import { useState } from "react";
+import jwt from 'jsonwebtoken';
+
+const SERVERURL = process.env.NEXT_PUBLIC_API_SERVERURL;
+const SECRET_KEY = process.env.SESSION_SECRET
 
 export default function Home() {
-  const router = useRouter()  
-  
+  const router = useRouter()
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [desc, setDesc ] = useState('');
+  const [desc, setDesc] = useState('');
   const [isLoading, setIsLoading] = useState(false); // 로딩 상태 
 
   const handleLogin = async (userID: string, password: string) => {
@@ -24,25 +27,24 @@ export default function Home() {
         body: JSON.stringify({ params }),
       });
       const { success, message, result } = await res.json();
-      
+
       if (success) {
-        console.log("로그인 성공")
+        // console.log("로그인 성공")
         router.push('/mega');
       } else {
-        console.log("로그인 실패")
         setIsDialogOpen(true);
         setDesc("아이디와 비밀번호를 확인하세요.")
       }
     } catch (err) {
       console.error(err);
-            
+
       setIsDialogOpen(true);
       setDesc("'알 수 없는 오류가 발생했습니다.")
     } finally {
       setIsLoading(false); // 로딩 종료
     }
   }
-  
+
   if (isLoading) {
     return <Loading />;
   } else {
@@ -56,7 +58,7 @@ export default function Home() {
           <LoginForm onLogin={handleLogin} />
         </div>
         {isDialogOpen && (
-          <AlertDialogDemo isOpen={isDialogOpen} title="로그인 실패"  content = {desc} onClose={() => setIsDialogOpen(false)} />
+          <AlertDialogDemo isOpen={isDialogOpen} title="로그인 실패" content={desc} onClose={() => setIsDialogOpen(false)} />
         )}
       </div>
     );
