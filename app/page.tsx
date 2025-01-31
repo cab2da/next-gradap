@@ -14,7 +14,7 @@ export default function Home() {
   const router = useRouter()
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [desc, setDesc] = useState('');
-  const [isLoading, setIsLoading] = useState(true); // 로딩 상태 
+  const [isLoading, setIsLoading] = useState(false); // 로딩 상태 
 
   const handleLogin = async (userID: string, password: string) => {
     const params = { userID, password }
