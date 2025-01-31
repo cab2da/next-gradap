@@ -30,7 +30,7 @@ function DashboardPage() {
     const { user, error } = UserData();
 
     const [dataResult, setDataResult] = useState<DataResult[]>([]);
-    const [isLoading, setIsLoading] = useState(false); // 로딩 상태 
+    const [isLoading, setIsLoading] = useState(true); // 로딩 상태 
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [desc, setDesc] = useState('');
 

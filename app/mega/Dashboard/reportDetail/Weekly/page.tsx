@@ -61,7 +61,7 @@ const WeeklyDashboard = () => {
         throw new Error('userInfo must be used within a SelectedLawdCodeContext.Provider');
     }
     const { userSub, setUserSub } = contextUserSub;
-    const [isLoading, setIsLoading] = useState(false); // 로딩 상태 
+    const [isLoading, setIsLoading] = useState(true); // 로딩 상태 
 
     const SERVERURL = process.env.NEXT_PUBLIC_API_SERVERURL;
 

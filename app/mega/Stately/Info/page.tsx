@@ -16,7 +16,7 @@ const StatelyCInfo = () => {
     const [dataResult, setDataResult] = useState<DataResult[]>([]);
     const [refresh, setRefresh] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
-    const [isLoading, setIsLoading] = useState(false); // 로딩 상태 
+    const [isLoading, setIsLoading] = useState(true); // 로딩 상태 
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isDialogOpenDB, setIsDialogOpenDB] = useState(false);
 

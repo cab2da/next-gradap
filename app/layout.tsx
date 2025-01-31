@@ -35,15 +35,15 @@ export default function RootLayout({
       suppressHydrationWarning>
 
       <body>
-        <Suspense fallback={<Loading />}>
+        {/* <Suspense fallback={<Loading />}> */}
 
-          {children}
+        {children}
 
-          <div className="fixed bottom-0 left-0 right-0 z-50">
-            <Navbar />
-          </div>
+        <div className="fixed bottom-0 left-0 right-0 z-50">
+          <Navbar />
+        </div>
 
-        </Suspense>
+        {/* </Suspense> */}
       </body>
     </html>
   );

@@ -40,7 +40,7 @@ const StatelyDetail = () => {
     const [refresh, setRefresh] = useState(false);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [desc, setDesc] = useState('');
-    const [isLoading, setIsLoading] = useState(false); // 로딩 상태 
+    const [isLoading, setIsLoading] = useState(true); // 로딩 상태 
     const [tabsDefault, setTabsDefault] = useState('cratop');
 
     const SERVERURL = process.env.NEXT_PUBLIC_API_SERVERURL;
