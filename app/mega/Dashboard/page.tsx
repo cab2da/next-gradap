@@ -15,7 +15,6 @@ import { AlertDialogDemo } from '@/components/Alert-dialog';
 import CustomButtonComponent from '@/components/CustomButtonComponent ';
 import UserInfoCard from '@/components/UserInfoCard';
 import { useRouter } from 'next/navigation';
-import { ExcuteStoredProcedure } from '../../api/utils/db'
 
 interface DataResult {
     user_id: string;
